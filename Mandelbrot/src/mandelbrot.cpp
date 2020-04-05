@@ -1,24 +1,37 @@
 #include <glad/glad.h>
 #include <GLFW/glfw3.h>
-#include <stb/stb_image.h>
 #include <windows.h>
 #include <shaders.h>
+#include <glm/glm/gtc/matrix_transform.hpp>
+#include <glm/glm/gtc/type_ptr.hpp>
+#include <map>
+#include <text.h>
+#include <ft2build.h>
+#include FT_FREETYPE_H  
+#include <resource_manager.h>
+#include <mandelbrot_set.h>
+#include <sstream>
+#include <iostream>
+#include <fstream>
 
-// enable optimus!
+// Enable optimus!
 extern "C" {
     _declspec(dllexport) DWORD NvOptimusEnablement = 0x00000001;
 }
 
-void framebuffer_size_callback(GLFWwindow* window, int width, int height);
-void processInput(GLFWwindow* window);
-
-// settings
+// Settings
 constexpr unsigned int SCR_WIDTH = 800;
 constexpr unsigned int SCR_HEIGHT = 600;
 
+// Functions
+void framebuffer_size_callback(GLFWwindow* window, int width, int height);
+void processInputs(GLFWwindow* window, Mandelbrot& data);
+
 int main()
 {
-    // glfw: initialize and configure
+    /************************************************************
+      ------------- Glfw: initialize and configure --------------
+      ***********************************************************/
     glfwInit();
     glfwWindowHint(GLFW_CONTEXT_VERSION_MAJOR, 4);
     glfwWindowHint(GLFW_CONTEXT_VERSION_MINOR, 3);
@@ -42,129 +55,178 @@ int main()
         return -1;
     }
 
-    const char* vertex_shader = "C:\\Users\\Varth\\Desktop\\-\\Projekty\\OpenGL\\Mandelbrot\\shaders\\vertex_shader.vs";
-    const char *fragment_shader = "C:\\Users\\Varth\\Desktop\\-\\Projekty\\OpenGL\\Mandelbrot\\shaders\\fragment_shader.fs";
-    Shader shader(vertex_shader, fragment_shader);
+    ///************************************************************
+    // -------------------- Create rectangle ----------------------
+    // ***********************************************************/
+    //constexpr float vertices[] = {
+    //    //positions
+    //    1.0f,   1.0f,  0.0F,  // top right 
+    //    1.0f,  -1.0f,  0.0F,  // bottom right
+    //   -1.0f,  -1.0f,  0.0F,  // bottom left
+    //   -1.0f,   1.0f,  0.0F   // top left
+    //};
 
-    float vertices[] = {
-        // positions          // colors           // texture coords
-         0.5f,  0.5f, 0.0f,   1.0f, 0.0f, 0.0f,   1.0f, 1.0f,   // top right
-         0.5f, -0.5f, 0.0f,   0.0f, 1.0f, 0.0f,   1.0f, 0.0f,   // bottom right
-        -0.5f, -0.5f, 0.0f,   0.0f, 0.0f, 1.0f,   0.0f, 0.0f,   // bottom left
-        -0.5f,  0.5f, 0.0f,   1.0f, 1.0f, 0.0f,   0.0f, 1.0f    // top left 
-    };
-    unsigned int indices[] = {
-        0, 1, 3, // first triangle
-        1, 2, 3  // second triangle
-    };
+    //constexpr unsigned int indices[] = {
+    //    0, 1, 3, // first triangle
+    //    1, 2, 3  // second triangle
+    //};
 
-    /* VBO - vertex buffer objects  
-       glBindBuffer(GL_ARRAY_BUFFER, VBO) - binds VBO to GL_ARRAY_BUFFER
-       glBufferData(GL_ARRAY_BUFFER, sizeof(vertices), vertices, GL_STATIC_DRAW) - a function specifically targeted to copy user-defined data into 
-                                                                                   the currently bound buffe -> (target, size of data in bytes, actual data
-       Actual data: 
-         *GL_STREAM_DRAW: the data is set only once and used by the GPU at most a few times,
-         *GL_STATIC_DRAW: the data is set only once and used many times,
-         *GL_DYNAMIC_DRAW: the data is changed a lot and used many times.
+    ///* VBO - vertex buffer objects
+    //   glBindBuffer(GL_ARRAY_BUFFER, VBO) - binds VBO to GL_ARRAY_BUFFER
+    //   glBufferData(GL_ARRAY_BUFFER, sizeof(vertices), vertices, GL_STATIC_DRAW) - a function specifically targeted to copy user-defined data into
+    //                                                                               the currently bound buffe -> (target, size of data in bytes, actual data
+    //   Actual data:
+    //     *GL_STREAM_DRAW: the data is set only once and used by the GPU at most a few times,
+    //     *GL_STATIC_DRAW: the data is set only once and used many times,
+    //     *GL_DYNAMIC_DRAW: the data is changed a lot and used many times.*/
+    //GLuint VAO, VBO,EBO;
+    //glGenVertexArrays(1, &VAO);
+    //glGenBuffers(1, &VBO);
+    //glGenBuffers(1, &EBO);
+    //glBindVertexArray(VAO);
+    //
+    //// Rectangle buffer
+    //glBindBuffer(GL_ARRAY_BUFFER, VBO);
+    //glBufferData(GL_ARRAY_BUFFER, sizeof(vertices), vertices, GL_STATIC_DRAW);  
+    //// Indices buffer
+    //glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, EBO);
+    //glBufferData(GL_ELEMENT_ARRAY_BUFFER, sizeof(indices), indices, GL_STATIC_DRAW);
 
-    0. bind Vertex Array Object
-    1. copy our vertices array in a buffer for OpenGL to use 
-    */
-    unsigned int VBO, VAO, EBO;
-    glGenVertexArrays(1, &VAO);
-    glGenBuffers(1, &VBO);
-    glGenBuffers(1, &EBO);
+    ///*  tell OpenGL how it should interpret the vertex data
+    //    glVertexAttribPointer(vertex attribute we want to configure - location = 0, size of the vertex attribute,
+    //    type of the data, pecifies if we want the data to be normalized, stride - tells us the space between consecutive vertex attributes,
+    //    offset of where the position data begins in the buffe)*/
+    //// position attribute
+    //glVertexAttribPointer(0, 3, GL_FLOAT, GL_FALSE, 3 * sizeof(float), (void*)0);
+    //glEnableVertexAttribArray(0);
 
-    glBindVertexArray(VAO);
 
-    glBindBuffer(GL_ARRAY_BUFFER, VBO);
-    glBufferData(GL_ARRAY_BUFFER, sizeof(vertices), vertices, GL_STATIC_DRAW);
+    /************************************************************
+    ------------------------ Set font -------------------------
+    //***********************************************************/
+    //TextRenderer TextRenderer(SCR_WIDTH, SCR_HEIGHT);
+    //const char* font_path = "C:\\Users\\Varth\\Desktop\\-\\Projekty\\OpenGL\\fonts\\MonospaceTypewriter.ttf";
+    //TextRenderer.Load(font_path, 25);
+    //
+    MandelbrotSet MandelbrotSet;
+    MandelbrotSet.Load();
 
-    glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, EBO);
-    glBufferData(GL_ELEMENT_ARRAY_BUFFER, sizeof(indices), indices, GL_STATIC_DRAW);
-
-    /*  tell OpenGL how it should interpret the vertex data
-    glVertexAttribPointer(vertex attribute we want to configure - location = 0, size of the vertex attribute,
-                          type of the data, pecifies if we want the data to be normalized, stride - tells us the space between consecutive vertex attributes,
-                          offset of where the position data begins in the buffe)
-    1. then set the vertex attributes pointers
-    */
-
-    // position attribute
-    glVertexAttribPointer(0, 3, GL_FLOAT, GL_FALSE, 8 * sizeof(float), (void*)0);
-    glEnableVertexAttribArray(0);
-    // color attribute
-    glVertexAttribPointer(1, 3, GL_FLOAT, GL_FALSE, 8 * sizeof(float), (void*)(3 * sizeof(float)));
-    glEnableVertexAttribArray(1);
-    // texture coord attribute
-    glVertexAttribPointer(2, 2, GL_FLOAT, GL_FALSE, 8 * sizeof(float), (void*)(6 * sizeof(float)));
-    glEnableVertexAttribArray(2);
-
-    /* glTexParameteri(texture type, texture axis, texture behaviour if GL_CLAMP_TO_BORDER  - need to specify border color) example:
-    float borderColor[] = { 1.0f, 1.0f, 0.0f, 1.0f };
-    glTexParameterfv(GL_TEXTURE_2D, GL_TEXTURE_BORDER_COLOR, borderColor);*/
-    unsigned int texture;
-    glGenTextures(1, &texture);
-    glBindTexture(GL_TEXTURE_2D, texture);
-    // set the texture wrapping/filtering options (on the currently bound texture object)
-    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_REPEAT);
-    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_REPEAT);
-    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR);
-    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
-    // load and generate the texture
-    int width, height, nrChannels;
-    const char* file_path = "C:\\Users\\Varth\\Desktop\\-\\Projekty\\OpenGL\\textures\\marble.jpg";
-    unsigned char* data = stbi_load(file_path, &width, &height, &nrChannels, 0);
-    if (data)
-    {
-        glTexImage2D(GL_TEXTURE_2D, 0, GL_RGB, width, height, 0, GL_RGB, GL_UNSIGNED_BYTE, data);
-        glGenerateMipmap(GL_TEXTURE_2D);
-    }
-    else
-    {
-        std::cout << "Failed to load texture" << std::endl;
-    }
-    stbi_image_free(data);
-    
+    //Shader Shader;
+    //Shader.load(vertex_shader, fragment_shader);
+    //Mandelbrot* data = new Mandelbrot{0.0f, 0.0f, 0.0f, 0.0f, 1.0f, 50};
+   
     //glPolygonMode(GL_FRONT_AND_BACK, GL_LINE);
     // glUseProgram(ID); 
+    int width, height;
 
     // render loop
     while (!glfwWindowShouldClose(window))
     {
+        // track window size
+        glfwGetWindowSize(window, &width, &height);
         // input
-        processInput(window);
-
-        glClearColor(0.2f, 0.6f, 0.3f, 1.0f);
+        processInputs(window, MandelbrotSet.data);
         glClear(GL_COLOR_BUFFER_BIT);
 
-        // 2. use our shader program when we want to render an object
-        glBindTexture(GL_TEXTURE_2D, texture);
-        shader.use();
-        glBindVertexArray(VAO);
-        glDrawElements(GL_TRIANGLES, 6, GL_UNSIGNED_INT, 0);
+        MandelbrotSet.Update(width, height, MandelbrotSet.data);
+        //glUniform1f(0, width);
+        //glUniform1f(1, height);
+        //glUniform2f(2, 
+        //           -2.0f * data->zoom + data->x + data->scale_x, 
+        //            1.0f * data->zoom + data->x + data->scale_x);
+        //glUniform2f(3, 
+        //           -1.2f * data->zoom + data->y + data->scale_y, 
+        //            1.2f * data->zoom + data->y + data->scale_y);
+        //glUniform1ui(4, data->max_iterations);
 
+        //glBindVertexArray(VAO);
+        //glDrawElements(GL_TRIANGLES, 6, GL_UNSIGNED_INT, 0);
+
+        std::stringstream ss; ss << (-2.0f * MandelbrotSet.data.zoom + MandelbrotSet.data.x + MandelbrotSet.data.scale_x);
+        //TextRenderer.RenderText("x:", 5.0f, 5.0f, 1.0f);
         glfwPollEvents();
         glfwSwapBuffers(window);
     }
 
-    glDeleteVertexArrays(1, &VAO);
-    glDeleteBuffers(1, &VBO);
-    glDeleteBuffers(1, &EBO);
+    //glDeleteVertexArrays(1, &VAO);
+    //glDeleteBuffers(1, &VBO);
+    //glDeleteBuffers(1, &EBO);
 
     glfwTerminate();
     return 0;
 }
 
 // process all input: query GLFW whether relevant keys are pressed/released this frame and react accordingly
-void processInput(GLFWwindow* window)
+void processInputs(GLFWwindow* window, Mandelbrot& data)
 {
+
     if (glfwGetKey(window, GLFW_KEY_ESCAPE) == GLFW_PRESS)
-        glfwSetWindowShouldClose(window, true);
+        glfwSetWindowShouldClose(window, true);    
+    if (glfwGetKey(window, GLFW_KEY_X) == GLFW_PRESS)
+        data.zoom -= -2.0f * data.zoom + data.x + data.scale_x < 0.01f ? 0.005f : 0.01f;
+    if (glfwGetKey(window, GLFW_KEY_Z) == GLFW_PRESS)
+        data.zoom += -2.0f * data.zoom + data.x + data.scale_x < 0.01f ? 0.005f : 0.01f;
+    if (glfwGetKey(window, GLFW_KEY_W) == GLFW_PRESS)
+        data.scale_y += -2.0f * data.zoom + data.x + data.scale_x < 0.01f ? 0.005f : 0.01f;
+    if (glfwGetKey(window, GLFW_KEY_S) == GLFW_PRESS)
+        data.scale_y -= -2.0f * data.zoom + data.x + data.scale_x < 0.01f ? 0.005f : 0.01f;
+    if (glfwGetKey(window, GLFW_KEY_D) == GLFW_PRESS)
+        data.scale_x += -2.0f * data.zoom + data.x + data.scale_x < 0.01f ? 0.005f : 0.01f;
+    if (glfwGetKey(window, GLFW_KEY_A) == GLFW_PRESS)
+        data.scale_x -= -2.0f * data.zoom + data.x + data.scale_x < 0.01f ? 0.005f : 0.01f;
+    if (glfwGetKey(window, GLFW_KEY_R) == GLFW_PRESS)
+        ++data.max_iterations;    
+    if (glfwGetKey(window, GLFW_KEY_E) == GLFW_PRESS)
+        --data.max_iterations;
 }
 
 // glfw: whenever the window size changed (by OS or user resize) this callback function executes
 void framebuffer_size_callback(GLFWwindow* window, int width, int height)
 {
     glViewport(0, 0, width, height);
+
 }
+
+//void RenderText(Shader& s, std::string text, GLfloat x, GLfloat y, GLfloat scale, glm::vec3 color)
+//{
+//    // Activate corresponding render state	
+//    s.use();
+//    glUniform3f(glGetUniformLocation(s.ID, "textColor"), color.x, color.y, color.z);
+//    glActiveTexture(GL_TEXTURE0);
+//    glBindVertexArray(VAO);
+//
+//    // Iterate through all characters
+//    std::string::const_iterator c;
+//    for (c = text.begin(); c != text.end(); c++)
+//    {
+//        Character ch = Characters[*c];
+//
+//        GLfloat xpos = x + ch.Bearing.x * scale;
+//        GLfloat ypos = y - (ch.Size.y - ch.Bearing.y) * scale;
+//
+//        GLfloat w = ch.Size.x * scale;
+//        GLfloat h = ch.Size.y * scale;
+//        // Update VBO for each character
+//        GLfloat vertices[6][4] = {
+//            { xpos,     ypos + h,   0.0, 0.0 },
+//            { xpos,     ypos,       0.0, 1.0 },
+//            { xpos + w, ypos,       1.0, 1.0 },
+//
+//            { xpos,     ypos + h,   0.0, 0.0 },
+//            { xpos + w, ypos,       1.0, 1.0 },
+//            { xpos + w, ypos + h,   1.0, 0.0 }
+//        };
+//        // Render glyph texture over quad
+//        glBindTexture(GL_TEXTURE_2D, ch.TextureID);
+//        // Update content of VBO memory
+//        glBindBuffer(GL_ARRAY_BUFFER, VBO);
+//        glBufferSubData(GL_ARRAY_BUFFER, 0, sizeof(vertices), vertices);
+//        glBindBuffer(GL_ARRAY_BUFFER, 0);
+//        // Render quad
+//        glDrawArrays(GL_TRIANGLES, 0, 6);
+//        // Now advance cursors for next glyph (note that advance is number of 1/64 pixels)
+//        x += (ch.Advance >> 6) * scale; // Bitshift by 6 to get value in pixels (2^6 = 64)
+//    }
+//    glBindVertexArray(0);
+//    glBindTexture(GL_TEXTURE_2D, 0);
+//}
