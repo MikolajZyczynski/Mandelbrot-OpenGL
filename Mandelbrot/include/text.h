@@ -24,25 +24,26 @@ struct Character {
 class TextRenderer
 {
 public:
-    //TextShader;
-    Shader TextShader;
-    // Shaders paths
-    const char* text_vs = "C:\\Users\\Varth\\Desktop\\-\\Projekty\\OpenGL\\Mandelbrot\\shaders\\text.vs";
-    const char* text_fs = "C:\\Users\\Varth\\Desktop\\-\\Projekty\\OpenGL\\Mandelbrot\\shaders\\text.fs";
     // Holds a list of pre-compiled Characters
     std::map<GLchar, Character> Characters;
     // Constructor
     TextRenderer(GLuint width, GLuint height);
     // Pre-compiles a list of characters from the given font
-    void Load(std::string font, GLuint fontSize);
+    void Load( GLuint fontSize);
     // Renders a string of text using the precompiled list of characters
     void RenderText(std::string text, GLfloat x, GLfloat y, GLfloat scale, glm::vec3 color = glm::vec3(1.0f));
 
     ~TextRenderer();
 
 private:
-    // Render state
+   //TextShader;
+   Shader TextShader;
+   // Render state
    GLuint VAO, VBO;
+   const char* font_path = "C:\\Users\\Varth\\Desktop\\-\\Projekty\\OpenGL\\fonts\\MonospaceTypewriter.ttf";
+   // Shaders paths
+   const char* text_vs = "C:\\Users\\Varth\\Desktop\\-\\Projekty\\OpenGL\\Mandelbrot\\shaders\\text.vs";
+   const char* text_fs = "C:\\Users\\Varth\\Desktop\\-\\Projekty\\OpenGL\\Mandelbrot\\shaders\\text.fs";
 };
 
 #endif 

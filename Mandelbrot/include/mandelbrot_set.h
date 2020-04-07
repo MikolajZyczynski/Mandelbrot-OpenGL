@@ -25,31 +25,26 @@ struct Mandelbrot
 class MandelbrotSet
 {
 public:
-    //DrawShader;
-    Shader DrawShader;
+    //Constructor
+    MandelbrotSet(Shader &shader);
     
     // Create data set
     Mandelbrot data {0.0f, 0.0f, 0.0f, 0.0f, 1.0f, 75};
 
-    // Shaders paths
-    const char* vertex_shader = "C:\\Users\\Varth\\Desktop\\-\\Projekty\\OpenGL\\Mandelbrot\\shaders\\vertex_shader.vs";
-    const char* fragment_shader = "C:\\Users\\Varth\\Desktop\\-\\Projekty\\OpenGL\\Mandelbrot\\shaders\\fragment_shader.fs";
-
-    // Constructor
-    MandelbrotSet();
     // Pre-compiles a list of characters from the given font
-    //void DrawRenderer();
     void Update(int& width, int& heigth, Mandelbrot& data);
-    void Load();
-    // Renders a string of text using the precompiled list of characters
-    //void RenderText(std::string text, GLfloat x, GLfloat y, GLfloat scale, glm::vec3 color = glm::vec3(1.0f));
 
     // Destructor
     ~MandelbrotSet();
 private:
     // Render state
+    Shader shader;
     GLuint VAO, VBO, EBO;
+    // Initializes and configures vertex attributes
+    void initRenderData();
 
+    const char* vertex_shader = "C:\\Users\\Varth\\Desktop\\-\\Projekty\\OpenGL\\Mandelbrot\\shaders\\vertex_shader.vs";
+    const char* fragment_shader = "C:\\Users\\Varth\\Desktop\\-\\Projekty\\OpenGL\\Mandelbrot\\shaders\\fragment_shader.fs";
 };
 
 #endif 

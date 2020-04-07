@@ -9,8 +9,7 @@
 
 TextRenderer::TextRenderer(GLuint width, GLuint height)
 {
-    //// Configure OpenGL
-    glEnable(GL_CULL_FACE);
+    // Configure OpenGL
     glEnable(GL_BLEND);
     glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
 
@@ -31,7 +30,7 @@ TextRenderer::TextRenderer(GLuint width, GLuint height)
     glBindVertexArray(0);
 }
 
-void TextRenderer::Load(std::string font, GLuint fontSize)
+void TextRenderer::Load(GLuint fontSize)
 {
     this->Characters.clear();
 
@@ -44,7 +43,7 @@ void TextRenderer::Load(std::string font, GLuint fontSize)
 
     // Load font as face
     FT_Face face;
-    if (FT_New_Face(ft, font.c_str(), 0, &face))
+    if (FT_New_Face(ft, font_path, 0, &face))
         std::cout << "ERROR::FREETYPE: Failed to load font" << std::endl;
 
     // Set size to load glyphs as
@@ -144,5 +143,5 @@ void TextRenderer::RenderText(std::string text, GLfloat x, GLfloat y, GLfloat sc
 
 TextRenderer::~TextRenderer()
 {
-
+    glDeleteVertexArrays(1, &this->VAO);
 }

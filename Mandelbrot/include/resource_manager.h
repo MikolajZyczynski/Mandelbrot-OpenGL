@@ -24,6 +24,7 @@ public:
     static Shader   LoadShader(const GLchar* vShaderFile, const GLchar* fShaderFile, const GLchar* gShaderFile, std::string name);
     // Retrieves a stored sader
     static Shader   GetShader(std::string name);
+
     // Properly de-allocates all loaded resources
     static void      Clear();
 private:

@@ -4,27 +4,30 @@
 #include <text.h>
 #include <mandelbrot_set.h>
 
-MandelbrotSet::MandelbrotSet()
+MandelbrotSet::MandelbrotSet(Shader& shader)
 {
     // Load and configure shader
-    this->DrawShader = ResourceManager::LoadShader(vertex_shader, fragment_shader, nullptr, "mandelbrot");
+    this->shader = ResourceManager::LoadShader(vertex_shader, fragment_shader, nullptr, "mandelbrot");
+    this->initRenderData();
 }
 
 void MandelbrotSet::Update(int& width, int& heigth, Mandelbrot& data)
 {
-    this->DrawShader.Use();
-    this->DrawShader.SetFloat("rect_width", width);
-    this->DrawShader.SetFloat("rect_height", width);
-    this->DrawShader.SetVector2f("area_w", -2.0f * data.zoom + data.x + data.scale_x,  1.0f * data.zoom + data.x + data.scale_x);
-    this->DrawShader.SetVector2f("area_h", -0.9f * data.zoom + data.y + data.scale_y,  1.4f * data.zoom + data.y + data.scale_y);
-    this->DrawShader.SetInteger("max_iterations", data.max_iterations);
+    this->shader.Use();
+    this->shader.SetFloat("rect_width", width);
+    this->shader.SetFloat("rect_height", width);
+    this->shader.SetVector2f("area_w", -2.0f * data.zoom + data.x + data.scale_x,  1.0f * data.zoom + data.x + data.scale_x);
+    this->shader.SetVector2f("area_h", -0.9f * data.zoom + data.y + data.scale_y,  1.4f * data.zoom + data.y + data.scale_y);
+    this->shader.SetInteger("max_iterations", data.max_iterations);
 
     glBindVertexArray(this->VAO);
     glDrawElements(GL_TRIANGLES, 6, GL_UNSIGNED_INT, 0);
     glBindVertexArray(0);
 }
 
-void MandelbrotSet::Load()
+
+
+void MandelbrotSet::initRenderData()
 {
     constexpr float vertices[] = {
         //positions
@@ -47,9 +50,7 @@ void MandelbrotSet::Load()
          *GL_STREAM_DRAW: the data is set only once and used by the GPU at most a few times,
          *GL_STATIC_DRAW: the data is set only once and used many times,
          *GL_DYNAMIC_DRAW: the data is changed a lot and used many times.*/
-    this->DrawShader.Use();
-
-   //GLuint VAO, VBO, EBO;
+    this->shader.Use();
     glGenVertexArrays(1, &this->VAO);
     glGenBuffers(1, &this->VBO);
     glGenBuffers(1, &this->EBO);
@@ -67,13 +68,15 @@ void MandelbrotSet::Load()
         type of the data, pecifies if we want the data to be normalized, stride - tells us the space between consecutive vertex attributes,
         offset of where the position data begins in the buffe)*/
         // position attribute
+    //glBindVertexArray(this->VAO);
     glVertexAttribPointer(0, 3, GL_FLOAT, GL_FALSE, 3 * sizeof(float), (void*)0);
     glEnableVertexAttribArray(0);
     glBindBuffer(GL_ARRAY_BUFFER, 0);
     glBindVertexArray(0);
-
 }
 
 MandelbrotSet::~MandelbrotSet()
 {
+
+    glDeleteVertexArrays(1, &this->VAO);
 }

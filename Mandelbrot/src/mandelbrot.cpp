@@ -104,12 +104,13 @@ int main()
     /************************************************************
     ------------------------ Set font -------------------------
     //***********************************************************/
-    //TextRenderer TextRenderer(SCR_WIDTH, SCR_HEIGHT);
-    //const char* font_path = "C:\\Users\\Varth\\Desktop\\-\\Projekty\\OpenGL\\fonts\\MonospaceTypewriter.ttf";
-    //TextRenderer.Load(font_path, 25);
-    //
-    MandelbrotSet MandelbrotSet;
-    MandelbrotSet.Load();
+    // Shaders paths
+    Shader shader = ResourceManager::GetShader("mandelbrot");
+    ResourceManager::GetShader("mandelbrot").Use().SetInteger("mandelbrot", 0);
+    MandelbrotSet* Mandelbrot = new MandelbrotSet(shader);
+
+    TextRenderer* Text = new TextRenderer(SCR_WIDTH, SCR_HEIGHT);
+    Text->Load(25);
 
     //Shader Shader;
     //Shader.load(vertex_shader, fragment_shader);
@@ -125,10 +126,10 @@ int main()
         // track window size
         glfwGetWindowSize(window, &width, &height);
         // input
-        processInputs(window, MandelbrotSet.data);
+        processInputs(window, Mandelbrot->data);
         glClear(GL_COLOR_BUFFER_BIT);
 
-        MandelbrotSet.Update(width, height, MandelbrotSet.data);
+        Mandelbrot->Update(width, height, Mandelbrot->data);
         //glUniform1f(0, width);
         //glUniform1f(1, height);
         //glUniform2f(2, 
@@ -142,8 +143,10 @@ int main()
         //glBindVertexArray(VAO);
         //glDrawElements(GL_TRIANGLES, 6, GL_UNSIGNED_INT, 0);
 
-        std::stringstream ss; ss << (-2.0f * MandelbrotSet.data.zoom + MandelbrotSet.data.x + MandelbrotSet.data.scale_x);
-        //TextRenderer.RenderText("x:", 5.0f, 5.0f, 1.0f);
+        std::stringstream ss; ss << (-2.0f * Mandelbrot->data.zoom + Mandelbrot->data.x + Mandelbrot->data.scale_x);
+        Text->RenderText("x:" + ss.str(), 5.0f, 5.0f, 1.0f);
+        ss << (-2.0f * Mandelbrot->data.zoom + Mandelbrot->data.x + Mandelbrot->data.scale_x);
+        Text->RenderText("y:" + ss.str(), 5.0f, 40.0f, 1.0f);
         glfwPollEvents();
         glfwSwapBuffers(window);
     }
