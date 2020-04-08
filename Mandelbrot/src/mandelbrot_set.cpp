@@ -15,17 +15,15 @@ void MandelbrotSet::Update(int& width, int& heigth, Mandelbrot& data)
 {
     this->shader.Use();
     this->shader.SetFloat("rect_width", width);
-    this->shader.SetFloat("rect_height", width);
+    this->shader.SetFloat("rect_height", heigth);
     this->shader.SetVector2f("area_w", -2.0f * data.zoom + data.x + data.scale_x,  1.0f * data.zoom + data.x + data.scale_x);
-    this->shader.SetVector2f("area_h", -0.9f * data.zoom + data.y + data.scale_y,  1.4f * data.zoom + data.y + data.scale_y);
+    this->shader.SetVector2f("area_h", -1.0f * data.zoom + data.y + data.scale_y,  1.0f * data.zoom + data.y + data.scale_y);
     this->shader.SetInteger("max_iterations", data.max_iterations);
 
     glBindVertexArray(this->VAO);
     glDrawElements(GL_TRIANGLES, 6, GL_UNSIGNED_INT, 0);
     glBindVertexArray(0);
 }
-
-
 
 void MandelbrotSet::initRenderData()
 {
@@ -50,7 +48,7 @@ void MandelbrotSet::initRenderData()
          *GL_STREAM_DRAW: the data is set only once and used by the GPU at most a few times,
          *GL_STATIC_DRAW: the data is set only once and used many times,
          *GL_DYNAMIC_DRAW: the data is changed a lot and used many times.*/
-    this->shader.Use();
+    //this->shader.Use();
     glGenVertexArrays(1, &this->VAO);
     glGenBuffers(1, &this->VBO);
     glGenBuffers(1, &this->EBO);
@@ -65,8 +63,8 @@ void MandelbrotSet::initRenderData()
 
     /*  tell OpenGL how it should interpret the vertex data
         glVertexAttribPointer(vertex attribute we want to configure - location = 0, size of the vertex attribute,
-        type of the data, pecifies if we want the data to be normalized, stride - tells us the space between consecutive vertex attributes,
-        offset of where the position data begins in the buffe)*/
+        type of the data, specifies if we want the data to be normalized, stride - tells us the space between consecutive vertex attributes,
+        offset of where the position data begins in the buffer)*/
         // position attribute
     //glBindVertexArray(this->VAO);
     glVertexAttribPointer(0, 3, GL_FLOAT, GL_FALSE, 3 * sizeof(float), (void*)0);
@@ -77,6 +75,5 @@ void MandelbrotSet::initRenderData()
 
 MandelbrotSet::~MandelbrotSet()
 {
-
     glDeleteVertexArrays(1, &this->VAO);
 }
