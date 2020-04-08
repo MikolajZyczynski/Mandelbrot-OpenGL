@@ -16,8 +16,6 @@ struct Mandelbrot
 {
     float x;
     float y;
-    float scale_x;
-    float scale_y;
     float zoom;
     int max_iterations;
 };
@@ -29,7 +27,7 @@ public:
     MandelbrotSet(Shader &shader);
     
     // Create data set
-    Mandelbrot data {0.0f, 0.0f, 0.0f, 0.0f, 1.0f, 75};
+    Mandelbrot data {0.0f, 0.0f, 1.0f, 60};
 
     // Pre-compiles a list of characters from the given font
     void Update(int& width, int& heigth, Mandelbrot& data);

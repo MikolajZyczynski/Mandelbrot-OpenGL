@@ -1,5 +1,4 @@
 #include <iostream>
-
 #include <glm/glm/gtc/matrix_transform.hpp>
 #include <text.h>
 #include <mandelbrot_set.h>
@@ -16,8 +15,8 @@ void MandelbrotSet::Update(int& width, int& heigth, Mandelbrot& data)
     this->shader.Use();
     this->shader.SetFloat("rect_width", width);
     this->shader.SetFloat("rect_height", heigth);
-    this->shader.SetVector2f("area_w", -2.0f * data.zoom + data.x + data.scale_x,  1.0f * data.zoom + data.x + data.scale_x);
-    this->shader.SetVector2f("area_h", -1.0f * data.zoom + data.y + data.scale_y,  1.0f * data.zoom + data.y + data.scale_y);
+    this->shader.SetVector2f("area_w", -2.0f * data.zoom + data.x ,  1.0f * data.zoom + data.x);
+    this->shader.SetVector2f("area_h", -1.0f * data.zoom + data.y,  1.0f * data.zoom + data.y);
     this->shader.SetInteger("max_iterations", data.max_iterations);
 
     glBindVertexArray(this->VAO);

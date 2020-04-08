@@ -38,9 +38,10 @@ public:
 private:
    //TextShader;
    Shader TextShader;
-   // Render state
+   //Render state
    GLuint VAO, VBO;
-   const char* font_path = "C:\\Users\\Varth\\Desktop\\-\\Projekty\\OpenGL\\fonts\\MonospaceTypewriter.ttf";
+   //Font path
+   const char* font_path = "C:\\Users\\Varth\\Desktop\\-\\Projekty\\OpenGL\\fonts\\unispace.ttf";
    // Shaders paths
    const char* text_vs = "C:\\Users\\Varth\\Desktop\\-\\Projekty\\OpenGL\\Mandelbrot\\shaders\\text.vs";
    const char* text_fs = "C:\\Users\\Varth\\Desktop\\-\\Projekty\\OpenGL\\Mandelbrot\\shaders\\text.fs";
